@@ -14,6 +14,14 @@ Conçue pour centraliser tous vos liens web en un seul endroit, organisés par c
 
 ---
 
+## 📸 Aperçu
+
+![Interface principale](screenshots/interface.png)
+![Mode édition](screenshots/edition.png)
+![Thèmes](screenshots/themes.png)
+
+---
+
 ## 🚀 Fonctionnalités
 
 - 📁 **Catégories personnalisables** — organisez vos liens par thème avec une couleur attribuée à chaque catégorie
@@ -21,10 +29,10 @@ Conçue pour centraliser tous vos liens web en un seul endroit, organisés par c
 - 🎨 **8 thèmes visuels** — Clair, Sombre, Pastel, Nuit Étoilée, Aurore Boréale, Lavande, Glace, Minuit
 - ✏️ **Mode édition** — ajoutez, modifiez, supprimez et réorganisez vos liens par glisser-déposer
 - 🔗 **Support des URI schemes** — ouvrez des applications locales (`msteams:`, `ms-outlook:`, `zoom:`...)
+- 📂 **Liens vers fichiers locaux** — créez des raccourcis vers des fichiers ou dossiers de votre ordinateur (`file:///C:/...`)
+- 📱 **Compatible mobile** — interface adaptée avec boutons de navigation tactile en mode édition
 - 💾 **Sauvegarde automatique** — vos modifications sont téléchargées dans un fichier HTML mis à jour
 - 🔄 **Mise à jour automatique** — notification discrète quand une nouvelle version est disponible
-- 📱 **Compatible mobile** — interface adaptée avec boutons de navigation tactile en mode édition
-- 📂 **Liens vers fichiers locaux** — créez des raccourcis vers des fichiers ou dossiers de votre ordinateur (`file:///C:/...`)
 - 🌐 **Fonctionne hors ligne** — l'application s'ouvre et s'utilise sans connexion internet. Une connexion est nécessaire uniquement pour accéder aux liens web et pour la recherche sur Google/SharePoint.
 
 ---
@@ -47,9 +55,9 @@ Conçue pour centraliser tous vos liens web en un seul endroit, organisés par c
 ### Barre de recherche
 | Mode | Description |
 |------|-------------|
-| 🔵 Mes liens | Filtre vos liens en temps réel |
-| **G** Google | Lance une recherche Google (Entrée) |
-| **S** SharePoint | Lance une recherche sur votre SharePoint (Entrée) |
+| Mes liens | Filtre vos liens en temps réel |
+| Google | Lance une recherche Google (Entrée) |
+| SharePoint | Lance une recherche sur votre SharePoint (Entrée) |
 
 ### URI schemes supportés
 Vous pouvez lancer des applications locales en tapant leur nom dans le champ URL :
