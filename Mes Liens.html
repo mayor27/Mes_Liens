@@ -1516,6 +1516,16 @@
             if (input) input.placeholder = placeholders[mode] || placeholders.liens;
             if (modeMenu) modeMenu.classList.remove('open');
 
+            // Mettre à jour le verrouillage de la barre selon le mode
+            const inputEl = document.getElementById('searchInput');
+            if (inputEl) {
+                const hasAnyLink = Object.values(data).some(function(info) { return info.links.length > 0; });
+                const locked = !hasAnyLink && mode === 'liens';
+                inputEl.disabled = locked;
+                inputEl.style.opacity = locked ? '0.45' : '';
+                inputEl.style.cursor = locked ? 'not-allowed' : '';
+            }
+
             if (mode === 'liens') {
                 if (input) input.value = '';
                 if (input) input.focus();
