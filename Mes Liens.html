@@ -1105,7 +1105,7 @@
         }
 
         /* Dialog centré glass */
-        #saveToast {
+        #saveToast, #updateToast {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -1136,7 +1136,7 @@
             transition: opacity 0.28s var(--ease-out), scale 0.28s var(--ease-out), translate 0.28s var(--ease-out);
             pointer-events: none;
         }
-        #saveToast.show {
+        #saveToast.show, #updateToast.show {
             opacity: 1;
             scale: 1;
             translate: -50% -50%;
@@ -1327,10 +1327,23 @@
             line-height: 1;
         }
            ========================================================= */
-        #updateToastOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:1050; }
-        #updateToastOverlay.show { display:block; }
-        #updateToast { display:none; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1051; flex-direction:column; gap:0.6rem; background:var(--surface); border-radius:var(--radius-lg); box-shadow:0 16px 40px rgba(0,0,0,0.18); padding:1.4rem 1.5rem; max-width:380px; width:90%; }
-        #updateToast.show { display:flex; }
+        #updateToastOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 8999;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            opacity: 0;
+            transition: opacity 0.3s var(--ease-out);
+            pointer-events: none;
+        }
+        #updateToastOverlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        #updateToast { display: none !important; }
+        #updateToast.show { display: flex !important; }
 
         @media (max-width: 640px) {
             .container { padding: 1rem 0.75rem 2rem; }
@@ -1390,9 +1403,9 @@
                     <button class="menu-item" id="filtersToggleBtn"><span class="menu-item-icon">🏷️</span><span class="menu-item-text" style="display:flex;align-items:center;justify-content:space-between;">Filtres Catégories <input type="checkbox" id="filtersCheckbox" checked="" class="menu-item-checkbox" onclick="event.stopPropagation()"></span></button>
                     <div class="menu-separator"></div>
                     <button class="menu-item" id="sharepointToggleBtn" onclick="event.stopPropagation()"><span class="menu-item-icon">🔗</span><span class="menu-item-text" style="display:flex;align-items:center;justify-content:space-between;">Recherche SharePoint <input type="checkbox" id="sharepointEnabledCheckbox" class="menu-item-checkbox" onclick="event.stopPropagation()"></span></button>
-                    <div id="sharepointUrlField" style="padding: 4px 11px 10px 11px; display:grid; grid-template-columns:18px 1fr; align-items:center; gap:8px;">
-                        <span style="font-size:0.6rem; font-weight:800; font-family:var(--font-ui); color:var(--text-muted); background:var(--bg-subtle); border:1px solid var(--border-strong); border-radius:3px; width:18px; height:18px; display:flex; align-items:center; justify-content:center; box-sizing:border-box;">url</span>
-                        <input type="url" id="sharepointUrlInput" class="menu-sp-input" placeholder="https://m365.cloud.microsoft" spellcheck="false" autocomplete="off" style="width:100%; margin:0; box-sizing:border-box;">
+                    <div id="sharepointUrlField" style="padding: 4px 11px 10px 11px; display:flex; flex-direction:column; gap:6px;">
+                        <input type="url" id="sharepointUrlInput" class="menu-sp-input" placeholder="https://entreprise.sharepoint.com" spellcheck="false" autocomplete="off" style="width:100%; margin:0; box-sizing:border-box; font-size:0.68rem;">
+                        <button id="spTestBtn" onclick="event.stopPropagation(); var u=document.getElementById('sharepointUrlInput').value.trim(); if(u) window.open(u,'_blank');" style="font-size:0.72rem; font-family:var(--font-ui); font-weight:500; color:var(--text-muted); background:var(--bg-subtle); border:1px dashed var(--border-strong); border-radius:var(--radius); padding:0.28rem 0.5rem; cursor:pointer; text-align:left; transition:color 0.15s, border-color 0.15s; opacity:0.4;" onmouseover="if(document.getElementById('sharepointUrlInput').value.trim()){this.style.color='var(--accent)';this.style.borderColor='var(--accent)';}" onmouseout="this.style.color='var(--text-muted)';this.style.borderColor='var(--border-strong)';">🔗 Tester l'URL</button>
                     </div>
                     <div class="menu-separator"></div>
                     <button class="menu-item" id="themesBtn"><span class="menu-item-icon">🎨</span><span class="menu-item-text">Thèmes <span id="themesArrow" style="float:right; opacity:0.5;">∨</span></span></button>
@@ -1448,6 +1461,8 @@
         const APP_VERSION   = '1.0';
         const GITHUB_HTML   = 'https://raw.githubusercontent.com/mayor27/Mes_Liens/refs/heads/main/Mes%20Liens.html';
         const GITHUB_VER    = 'https://raw.githubusercontent.com/mayor27/Mes_Liens/refs/heads/main/version.json';
+
+        let sharepointUrl = '';
 
         let data = {};
         
@@ -1604,15 +1619,38 @@
             });
         }
 
+        function showUpdateToast(title, sub) {
+            const toast = document.getElementById('saveToast');
+            const overlay = document.getElementById('saveToastOverlay');
+            if (!toast) return;
+            toast.querySelector('.toast-title').textContent = title;
+            toast.querySelector('.toast-sub').innerHTML = sub;
+            toast.querySelector('.toast-icon').textContent = '🔄';
+            toast.dataset.customized = '1';
+            toast.classList.remove('show');
+            if (overlay) overlay.classList.remove('show');
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            if (overlay) overlay.classList.add('show');
+        }
+
         function dismissUpdateToast() {
-            document.getElementById('updateToast').classList.remove('show');
-            document.getElementById('updateToastOverlay').classList.remove('show');
+            dismissSaveToast();
         }
 
         function dismissSaveToast() {
             const toast = document.getElementById('saveToast');
             const overlay = document.getElementById('saveToastOverlay');
-            if (toast) toast.classList.remove('show');
+            if (toast) {
+                toast.classList.remove('show');
+                // Restaurer le contenu original si modifié par showUpdateToast
+                if (toast.dataset.customized) {
+                    delete toast.dataset.customized;
+                    toast.querySelector('.toast-icon').textContent = '💾';
+                    toast.querySelector('.toast-title').textContent = 'Sauvegarde effectuée';
+                    toast.querySelector('.toast-sub').innerHTML = 'Tes modifications ont été enregistrées. La nouvelle version de <strong>Mes Liens</strong> se trouve dans ton dossier Téléchargements — remplace ton fichier actuel par celui-ci.';
+                }
+            }
             if (overlay) overlay.classList.remove('show');
         }
 
@@ -1645,7 +1683,8 @@
                     s.style.removeProperty('--card-color');
                 });
                 const html = _originalSource;
-                const updated = html.replace(/let data = \{[\s\S]*?\};/, 'let data = ' + JSON.stringify(data, null, 8) + ';');
+                let updated = html.replace(/let data = \{[\s\S]*?\};/, 'let data = ' + JSON.stringify(data, null, 8) + ';');
+                updated = updated.replace(/let sharepointUrl = '[^']*';/, "let sharepointUrl = '" + sharepointUrl.replace(/'/g, "\\'") + "';" );
                 const blob = new Blob([updated], {type: 'text/html'});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -2432,8 +2471,14 @@ function showModal(title, val1, val2, callback, isLink) {
             });
         });
             
+            let spUrlAtOpen = '';
             menuBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
+                if (!menu.classList.contains('active')) {
+                    spUrlAtOpen = sharepointUrl; // mémoriser à l'ouverture
+                } else {
+                    if (sharepointUrl !== spUrlAtOpen) doSave(); // sauvegarder si changé
+                }
                 menu.classList.toggle('active');
             });
             
@@ -2441,11 +2486,10 @@ function showModal(title, val1, val2, callback, isLink) {
                 const menuBtn = document.getElementById('menuBtn');
                 const menu = document.getElementById('menu');
                 const themesSubmenu = document.getElementById('themesSubmenu');
-                const themesBtn = document.getElementById('themesBtn');
                 
-                // Ne ferme pas si clic dans le menu ou sur le bouton menu
                 if (menuBtn.contains(e.target) || menu.contains(e.target)) return;
                 
+                if (menu.classList.contains('active') && sharepointUrl !== spUrlAtOpen) doSave();
                 menu.classList.remove('active');
                 themesSubmenu.classList.remove('show');
                 document.getElementById('themesArrow').textContent = '∨';
@@ -2508,7 +2552,8 @@ function showModal(title, val1, val2, callback, isLink) {
                     e.preventDefault();
                     const src = _originalSource;
                     // Vider le bloc data
-                    const github = src.replace(/let data = \{[\s\S]*?\};/, 'let data = {};');
+                    const github = src.replace(/let data = \{[\s\S]*?\};/, 'let data = {};')
+                                      .replace(/let sharepointUrl = '[^']*';/, "let sharepointUrl = '';");
                     const blob = new Blob([github], {type: 'text/html'});
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
@@ -2516,10 +2561,7 @@ function showModal(title, val1, val2, callback, isLink) {
                     a.click();
                     URL.revokeObjectURL(a.href);
                     // Toast confirmation
-                    document.getElementById('updateToast').querySelector('.toast-title').textContent = 'Fichier vide téléchargé';
-                    document.getElementById('updateToast').querySelector('.toast-sub').innerHTML = 'Une version vide de <strong>Mes Liens</strong> a été téléchargée dans ton dossier Téléchargements.';
-                    document.getElementById('updateToast').classList.add('show');
-                    document.getElementById('updateToastOverlay').classList.add('show');
+                    showUpdateToast('Fichier vide téléchargé', 'Une version vide de <strong>Mes Liens</strong> a été téléchargée dans ton dossier Téléchargements.');
                     return;
                 }
                 if (e.key === 'Escape' && active === searchInput) {
@@ -2538,12 +2580,9 @@ function showModal(title, val1, val2, callback, isLink) {
                     if (currentSearchMode === 'google') {
                         window.open('https://www.google.com/search?q=' + q, '_blank');
                     } else if (currentSearchMode === 'sharepoint') {
-                const spBase = (document.getElementById('sharepointUrlInput')?.value.trim() || 'https://m365.cloud.microsoft').replace(/\/$/, '');
+                const spBase = (document.getElementById('sharepointUrlInput')?.value.trim() || sharepointUrl).replace(/\/$/, '');
                         if (spBase) {
-                            const searchUrl = spBase.includes('m365.cloud.microsoft')
-                                ? spBase + '/search/?q=' + q
-                                : spBase + '/_layouts/15/search.aspx?q=' + q;
-                            window.open(searchUrl, '_blank');
+                            window.open(spBase + '/_layouts/15/search.aspx?q=' + q, '_blank');
                         }
                     } else {
                         const firstLink = document.querySelector('.categories-grid .link-item');
@@ -2602,6 +2641,7 @@ function showModal(title, val1, val2, callback, isLink) {
                     // Réinjecter les liens du collègue dans le nouveau HTML
                     const myData = 'let data = ' + JSON.stringify(data, null, 8) + ';';
                     newHtml = newHtml.replace(/let data = \{[\s\S]*?\};/, myData);
+                    newHtml = newHtml.replace(/let sharepointUrl = '[^']*';/, "let sharepointUrl = '" + sharepointUrl.replace(/'/g, "\\'") + "';");
                     // Télécharger le fichier fusionné
                     const blob = new Blob([newHtml], {type: 'text/html'});
                     const a = document.createElement('a');
@@ -2611,8 +2651,7 @@ function showModal(title, val1, val2, callback, isLink) {
                     URL.revokeObjectURL(a.href);
                     document.getElementById('updateBanner').style.display = 'none';
                     // Afficher le toast explicatif
-                    document.getElementById('updateToast').classList.add('show');
-                    document.getElementById('updateToastOverlay').classList.add('show');
+                    showUpdateToast('Mise à jour terminée', 'La dernière version de <strong>Mes Liens</strong> a été téléchargée dans ton dossier Téléchargements.<br><br>Récupère ce fichier et utilise-le à la place de ton fichier actuel.');
                 } catch(e) {
                     this.textContent = '❌ Erreur';
                     setTimeout(() => {
@@ -2670,9 +2709,17 @@ function showModal(title, val1, val2, callback, isLink) {
             function applySharepointEnabled(enabled) {
                 if (spCheckbox) spCheckbox.checked = enabled;
                 if (spUrlField) spUrlField.style.display = enabled ? 'grid' : 'none';
-                if (spModeOpt)  spModeOpt.style.display  = enabled ? 'flex'  : 'none';
-                if (!enabled && currentSearchMode === 'sharepoint') setSearchMode('liens');
+                const visible = enabled && !!sharepointUrl.trim();
+                if (spModeOpt)  spModeOpt.style.display = visible ? 'flex' : 'none';
+                if (!visible && currentSearchMode === 'sharepoint') setSearchMode('liens');
                 localStorage.setItem('mesLiens_sharepointEnabled', enabled ? '1' : '0');
+            }
+
+            function updateSharepointModeVisibility() {
+                const enabled = spCheckbox && spCheckbox.checked;
+                const visible = enabled && !!sharepointUrl.trim();
+                if (spModeOpt) spModeOpt.style.display = visible ? 'flex' : 'none';
+                if (!visible && currentSearchMode === 'sharepoint') setSearchMode('liens');
             }
 
             const spEnabled = localStorage.getItem('mesLiens_sharepointEnabled') !== '0';
@@ -2696,10 +2743,17 @@ function showModal(title, val1, val2, callback, isLink) {
             // ── URL SharePoint (persistée, réactive) ───────────────
             const spInput = document.getElementById('sharepointUrlInput');
             if (spInput) {
-                spInput.value = localStorage.getItem('mesLiens_sharepointUrl') || '';
+                spInput.value = sharepointUrl;
+                const updateTestBtn = function() {
+                    const btn = document.getElementById('spTestBtn');
+                    if (btn) btn.style.opacity = spInput.value.trim() ? '1' : '0.4';
+                };
                 spInput.addEventListener('input', function() {
-                    localStorage.setItem('mesLiens_sharepointUrl', this.value.trim());
+                    sharepointUrl = this.value.trim();
+                    updateSharepointModeVisibility();
+                    updateTestBtn();
                 });
+                updateTestBtn();
             }
 
             window.addEventListener('beforeunload', function(e) {
